@@ -19,8 +19,12 @@ public class Main {
 //		main.updateObject();
         //1. Dalszy rozwój
 //        main.printTeachers();
-        main.printClassTeachers();
-        
+//        main.printClassTeachers();
+        //2. Kaskadowanie
+//        main.cascadeTest();
+//        main.deleteSchool();
+//        main.cascadeTest_2();
+        main.deleteClass();
         main.close();
     }
 
@@ -172,5 +176,126 @@ public class Main {
             }
 
         }
+    }
+
+    private void deleteSchool(){
+        String hql = "from School s where s.name='UJ'";
+        Query<School> query = session.createQuery(hql, School.class);
+        List<School> results = query.list();
+        Transaction transaction = session.beginTransaction();
+        for (School s : results) {
+            session.delete(s);
+        }
+        transaction.commit();
+    }
+
+    private void deleteClass(){
+        String hql = "from SchoolClass s where s.profile='human.' and s.startYear = 2008";
+        Query<SchoolClass> query = session.createQuery(hql, SchoolClass.class);
+        List<SchoolClass> results = query.list();
+        Transaction transaction = session.beginTransaction();
+        for (SchoolClass s : results) {
+            session.delete(s);
+        }
+        transaction.commit();
+    }
+
+    private void cascadeTest(){
+        School school = new School();
+        school.setAddress("ul. Gołębia 24");
+        school.setName("UJ");
+
+        SchoolClass newClass = new SchoolClass();
+        newClass.setProfile("human.");
+        newClass.setCurrentYear(3);
+        newClass.setStartYear(2008);
+
+        Student newStudent = new Student();
+        newStudent.setName("Jan");
+        newStudent.setSurname("Kowalski");
+        newStudent.setPesel("12345678901");
+
+        Teacher teacher = new Teacher();
+        teacher.setName("Jan");
+        teacher.setSurname("Nowak");
+        teacher.setPesel("12345678912");
+
+        newClass.addTeacher(teacher);
+        newClass.addStudent(newStudent);
+        teacher.addClass(newClass);
+        school.addClass(newClass);
+
+        Transaction transaction = session.beginTransaction();
+        session.save(school);
+        session.save(teacher);
+        transaction.commit();
+
+    }
+
+    private void cascadeTest_2(){
+
+        School school = new School();
+        school.setAddress("ul. Gołębia 24");
+        school.setName("UJ");
+
+        School school1 = new School();
+        school1.setAddress("ul. Podchorążych 2");
+        school1.setName("UP");
+
+        SchoolClass newClass = new SchoolClass();
+        newClass.setProfile("human.");
+        newClass.setCurrentYear(3);
+        newClass.setStartYear(2008);
+
+        SchoolClass newClass1 = new SchoolClass();
+        newClass1.setProfile("human.");
+        newClass1.setCurrentYear(2);
+        newClass1.setStartYear(2009);
+
+        Student newStudent = new Student();
+        newStudent.setName("Jan");
+        newStudent.setSurname("Kowalski");
+        newStudent.setPesel("12345678901");
+
+        Student newStudent1 = new Student();
+        newStudent1.setName("Janusz");
+        newStudent1.setSurname("Kowalski");
+        newStudent1.setPesel("12345678901");
+
+        Teacher teacher = new Teacher();
+        teacher.setName("Jan");
+        teacher.setSurname("Nowak");
+        teacher.setPesel("12345678912");
+
+        Teacher teacher1 = new Teacher();
+        teacher1.setName("Janusz");
+        teacher1.setSurname("Nowak");
+        teacher1.setPesel("12345678912");
+
+
+
+        teacher.addClass(newClass);
+        teacher1.addClass(newClass1);
+        teacher1.addClass(newClass);
+        teacher.addClass(newClass1);
+
+        newClass1.addTeacher(teacher);
+        newClass1.addTeacher(teacher1);
+        newClass.addTeacher(teacher1);
+        newClass.addTeacher(teacher);
+
+        newClass.addStudent(newStudent);
+        newClass1.addStudent(newStudent1);
+
+        school.addClass(newClass);
+        school1.addClass(newClass1);
+
+        Transaction transaction = session.beginTransaction();
+        session.save(school);
+        session.save(school1);
+        session.save(teacher);
+        session.save(teacher1);
+        transaction.commit();
+
     }
 }

@@ -25,8 +25,7 @@ public class SchoolClass {
     @JoinColumn(name = "class_id")
     private Set<Student> students = new HashSet<>();
 
-    @ManyToMany(mappedBy = "classes", cascade = {CascadeType.PERSIST,
-            CascadeType.MERGE})
+    @ManyToMany(mappedBy = "classes", cascade = {CascadeType.ALL})
     private Set<Teacher> teachers = new HashSet<>();
 
     public Set<Teacher> getTeachers() {
